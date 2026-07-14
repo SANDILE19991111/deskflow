@@ -77,8 +77,3 @@ All `/api/tickets*` routes require `Authorization: Bearer <token>`.
 - **Central error handler** normalizes Mongoose `ValidationError`, `CastError`, and duplicate-key errors into consistent `400`/`404`/`409` JSON responses, so malformed input never crashes the process.
 - **Role gating** (`requireRole('Admin')`) is separate from auth (`protect`), so it's easy to see at the route-definition level exactly who can hit each endpoint.
 
-## Not yet done (Day 2 scope)
-
-- Additional endpoint-level tests beyond the smoke-test pass done during scaffolding
-- Postman collection / finalized OpenAPI polish
-- Rate limiting, helmet, and other hardening (optional stretch)
