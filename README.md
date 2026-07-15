@@ -131,3 +131,23 @@ Per the brief, the login screen offers a toggle between Employee and Admin to te
 **Design direction:** since this is an internal ops tool rather than a marketing page, the UI intentionally stays restrained — a slate/indigo palette, Space Grotesk for headings, monospace for ticket IDs and timestamps (fits the technical subject matter), full keyboard focus states, and `prefers-reduced-motion` respected.
 
 At the end of Day 3, both dashboards were fully interactive against **mock data** (`src/data/mockTickets.js`) — every integration point was marked with a `// TODO (Day 4):` comment showing exactly what backend call would replace it.
+
+## Day 4 — Full-Stack Integration
+
+Connected the React frontend to the real backend API, replacing every mock-data integration point flagged in Day 3.
+
+**Repo restructure:** the project was reorganized into this monorepo layout — `deskflow-backend/` and `deskflow-frontend/` as sibling folders under one root — so both halves of the stack live together with a shared history, rather than as two disconnected repos.
+
+**What changed from Day 3's mocked version:**
+
+- **Login (`LoginPage.jsx` + `AuthContext.jsx`)** — the role toggle now sends a real `POST /api/auth/login` request with the selected demo account's credentials, receives an actual signed JWT back, and stores it in `localStorage`. Every subsequent request automatically attaches it via an axios interceptor (`src/api/client.js`), so `protect` and `requireRole` on the backend are now doing real work against real requests, not being bypassed by mock state.
+
+- **Employee dashboard** — `GET /api/tickets` on load fetches the logged-in employee's own tickets (filtered server-side, not client-side) via `useEffect`; submitting the form now calls `POST /api/tickets` and prepends the real created ticket — with its real MongoDB `_id` — to the list.
+
+- **Admin dashboard** — fetches every ticket in the organization on load, and the inline status dropdown now calls `PUT /api/tickets/:id`, updating local state from the server's response rather than assuming the change succeeded.
+
+- **Error states** — both dashboards surface backend error messages directly in the UI (e.g. a failed fetch or a validation rejection shows the actual `message` field from the API's JSON error response), rather than failing silently.
+
+`src/data/mockTickets.js` is no longer used by either dashboard as of this point — the app is running end-to-end against the same MongoDB Atlas database the backend's Postman/PowerShell tests were verified against in Day 2.
+
+**Known rough edge going into Day 5:** a few files (`App.jsx`, `LoginPage.jsx`, `AuthContext.jsx`, `api/client.js`, `ProtectedRoute.jsx`) were found emptied out during a later local sync issue unrelated to the actual Day 4 commit — restored from git history (`git show HEAD:...`) without incident, confirming the committed Day 4 work itself was intact throughout. Worth a clean end-to-end retest as part of Day 5.
