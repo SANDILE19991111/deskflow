@@ -103,3 +103,31 @@ Controller logic and validation were largely built alongside the Day 1 scaffold,
 This confirms the two behaviors the brief specifically requires: employees can only ever retrieve tickets where `createdBy` matches their own user ID, and every standard HTTP status code (400/401/403/404) is returned correctly rather than the API crashing or falling back to a generic 500.
 
 **Result: 18/18 passing**, run directly against the real Atlas-backed database — not mocked.
+
+
+## Day 3 — Frontend Core Setup
+
+Bootstrapped the React app with Vite, React Router, and Tailwind CSS v4, and built out the routing/layout skeleton the rest of the frontend hangs off of.
+
+**Routing (`src/App.jsx`):**
+- `/login` — public
+- `/employee` — protected, Employee role only
+- `/admin` — protected, Admin role only
+- A route guard (`src/auth/ProtectedRoute.jsx`) redirects unauthenticated users to `/login`, and redirects a logged-in user to *their own* dashboard if they try to visit the wrong one (e.g. an Employee hitting `/admin` gets bounced to `/employee`, not shown an error page).
+
+**Auth simulation (`src/auth/AuthContext.jsx`):**
+Per the brief, the login screen offers a toggle between Employee and Admin to test role-based views. Rather than a bare mock toggle, it's backed by the real seeded demo accounts (`employee@deskflow.io` / `admin@deskflow.io`), so the same component structure carries straight through into Day 4's real API integration without a rewrite.
+
+**Component decomposition** — deliberately broken apart rather than built as monolithic dashboard files, since this is directly called out in the evaluation criteria:
+
+- `TicketForm.jsx` — new ticket submission, with client-side validation mirroring the backend's exact rules (title 3–120 chars, description 10–2000, priority enum)
+- `TicketCard.jsx` / `AdminTicketRow.jsx` — individual ticket display, employee vs. admin variants
+- `EmployeeTicketList.jsx` / `AdminTicketFeed.jsx` — list containers with empty states
+- `StatusStepper.jsx` — status shown as a position along Open → In Progress → Resolved, since status is genuinely a workflow stage, not just a flat label
+- `StatusSelect.jsx` — the admin's inline status-update control
+- `PriorityTag.jsx` — small priority indicator
+- `AppShell.jsx` — shared topbar (role badge, name, sign out) wrapping both dashboards
+
+**Design direction:** since this is an internal ops tool rather than a marketing page, the UI intentionally stays restrained — a slate/indigo palette, Space Grotesk for headings, monospace for ticket IDs and timestamps (fits the technical subject matter), full keyboard focus states, and `prefers-reduced-motion` respected.
+
+At the end of Day 3, both dashboards were fully interactive against **mock data** (`src/data/mockTickets.js`) — every integration point was marked with a `// TODO (Day 4):` comment showing exactly what backend call would replace it.
