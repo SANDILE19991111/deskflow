@@ -6,6 +6,8 @@ function LoginPage() {
   const [role, setRole] = useState('Employee')
   const [email, setEmail] = useState(DEMO_ACCOUNTS.Employee.email)
   const [password, setPassword] = useState('password123')
+  const [error, setError] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
 
@@ -14,12 +16,18 @@ function LoginPage() {
     setEmail(DEMO_ACCOUNTS[nextRole].email)
   }
 
-  // TODO (Day 4): call POST /api/auth/login with { email, password },
-  // then use the returned user.role instead of the toggle's role.
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    login(role)
-    navigate(role === 'Admin' ? '/admin' : '/employee')
+    setError(null)
+    setSubmitting(true)
+    try {
+      const user = await login(role)
+      navigate(user.role === 'Admin' ? '/admin' : '/employee')
+    } catch (err) {
+      setError('Login failed. Please check the demo credentials.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -75,12 +83,19 @@ function LoginPage() {
             />
           </div>
 
+          {error && (
+            <p className="mt-4 rounded-md border border-priority-high/30 bg-priority-high/10 px-3 py-2 text-xs text-priority-high">
+              {error}
+            </p>
+          )}
+
           <button
             type="submit"
+            disabled={submitting}
             className="mt-6 w-full rounded-md bg-indigo px-4 py-2 text-sm font-semibold text-white
-                       transition-opacity hover:opacity-90"
+                       transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            Sign in as {role}
+            {submitting ? 'Signing in…' : `Sign in as ${role}`}
           </button>
 
           <p className="mt-4 text-center text-xs text-ink/40">
