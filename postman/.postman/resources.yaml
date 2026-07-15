@@ -1,0 +1,9 @@
+# Use this workspace to collaborate
+workspace:
+  id: 6a7700af-1b53-4ce7-83a2-75c50fa07fa0
+
+localResources:
+  collections:
+    - ../DeskFlow.postman_collection.json
+  environments:
+    - ../DeskFlow.postman_environment.json

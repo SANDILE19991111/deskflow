@@ -14,8 +14,15 @@ function notFound(req, res, next) {
  */
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
-  let statusCode = err.statusCode || 500;
+  let statusCode = err.statusCode || err.status || 500;
   let message = err.message || 'Internal Server Error';
+
+  // express.json() throws a SyntaxError (status 400) on malformed JSON bodies —
+  // without this check it would otherwise fall through to a 500.
+  if (err.type === 'entity.parse.failed') {
+    statusCode = 400;
+    message = 'Malformed JSON in request body';
+  }
 
   // Mongoose validation errors (e.g. missing required field, bad enum value)
   if (err.name === 'ValidationError') {
